@@ -1,4 +1,4 @@
-/* Solve a xor problem using BP neural net with one hiden layer. */
+/* Solve a XOR problem using BP neural net with one hiden layer. */
 
 #include <iostream>
 #include "bpnet.h"

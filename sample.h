@@ -6,8 +6,8 @@
 
 #define IN 2
 #define OUT 1
-#define SAMPLE_DIM (IN + OUT)
 
-extern const std::vector<std::array<double, SAMPLE_DIM>> samples;
+extern const std::vector<std::array<double, IN>> samples_in;
+extern const std::vector<std::array<double, OUT>> samples_out;
 
 #endif
