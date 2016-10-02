@@ -3,12 +3,10 @@
  * Activation function: Sigmod function f(x) = 1 / (1 + e^(-x))
  * Hiden layer:
  *   layer 1
- *     nodes number: 2 * input_number + 1
+ *     nodes number: 2 (It should be about 2 * input_num + 1, but XOR is a simple problem)
  *     learning rate: fixed as 0.6
- *     threshold: fixed as 0
  * Output layer:
  *   learning rate: fixed as 0.6
- *   threshold: fixed as 0
  * Convergence checking:
  *   |error| < 0.008 */
 
@@ -17,7 +15,7 @@
 
 #include "sample.h"
 
-#define HIDEN ((2 * IN) + 1)
+#define HIDEN 2 // ((2 * IN) + 1)
 
 class BpNet {
  public:
@@ -44,7 +42,9 @@ class BpNet {
 
   // compute the absolute values of errors
   void BpNet::GetErr(int samples_order, array<double, OUT>& err);
-
 };
+
+double GetRand(); // get a random number in [-0.5 0.5]
+double Sigmod(double x); // sigmod function
 
 #endif
