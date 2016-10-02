@@ -24,6 +24,9 @@ class BpNet {
   BpNet(double rate_h1_ = 0.6, double rate_o_ = 0.6, double err_thres_ = 0.008);
   ~BpNet();
 
+  // train the neural net
+  void BpNet::Train();
+
  private:
   std::array<std::array<double, HIDEN>, IN> w_h1; // the input weights of hiden nodes in 1st layer
   std::array<std::array<double, OUT>, HIDEN> w_o; // the input weights of output nodes
@@ -32,6 +35,16 @@ class BpNet {
   double rate_h1; // learning rate of hiden nodes in 1st layer
   double rate_o; // learning rate of output nodes
   double err_thres; // threshold of convergence checking
+
+  // compute the output of hiden nodes in 1st layer
+  void BpNet::GetOutH1(int samples_order, array<double, HIDEN>& out_h1);
+
+  // compute the output of output nodes
+  void BpNet::GetOutOut(int samples_order, array<double, OUT>& out_out);
+
+  // compute the absolute values of errors
+  void BpNet::GetErr(int samples_order, array<double, OUT>& err);
+
 };
 
 #endif
