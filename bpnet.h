@@ -17,7 +17,9 @@
 
 #include "sample.h"
 
-#define HIDEN 2 // ((2 * IN) + 1)
+#define HIDEN1 2 // ((2 * IN) + 1)
+
+using array_h1 = std::array<double, HIDEN1>;
 
 class BpNet {
  public:
@@ -30,10 +32,10 @@ class BpNet {
   void Train();
 
  private:
-  std::array<std::array<double, HIDEN>, IN> w_h1; // the input weights of hiden nodes in 1st layer
-  std::array<std::array<double, OUT>, HIDEN> w_o; // the input weights of output nodes
-  std::array<double, HIDEN> thres_h1; // threshold of hiden nodes in 1st layer
-  std::array<double, OUT> thres_o; // threshold of output nodes
+  std::array<array_h1, IN> w_h1; // the input weights of hiden nodes in 1st layer
+  std::array<array_o, HIDEN1> w_o; // the input weights of output nodes
+  array_h1 thres_h1; // threshold of hiden nodes in 1st layer
+  array_o thres_o; // threshold of output nodes
   double rate_w_h1; // learning rate of hiden nodes in 1st layer
   double rate_w_o; // learning rate of output nodes
   double rate_thres_h1; // learning rate of hiden nodes in 1st layer
@@ -41,19 +43,19 @@ class BpNet {
   double err_thres; // threshold of convergence checking
 
   // compute the output of hiden nodes in 1st layer
-  void GetOutH1(int samples_order, array<double, HIDEN>& out_h1);
+  void GetOutH1(int samples_order, array_h1& out_h1);
 
   // compute the output of output nodes
-  void GetOutO(int samples_order, array<double, OUT>& out_o);
+  void GetOutO(const array_h1& out_h1, array_o& out_o);
 
   // compute the errors of output nodes
-  void GetErrO(int samples_order, const array<double, OUT>& out_o, array<double, OUT>& err_o);
+  void GetErrO(int samples_order, const array_o& out_o, array_o& err_o);
 
   // check weither the errors are acceptable
-  bool CheckConv(const array<double, OUT>& err_o);
+  bool CheckConv(const array_o& err_o);
 
   // compute the errors of hiden nodes in 1st layer
-  void GetErrH1();
+  void GetErrH1(const array_o& err_o, array_h1& err_h1);
 };
 
 #endif

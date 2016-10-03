@@ -28,3 +28,11 @@
 *.out
 *.app
 xor-neural-net
+
+# VS project files
+xor-neural-net.vcxproj
+xor-neural-net.vcxproj.filters
+Debug
+
+# Backup files
+*.bak

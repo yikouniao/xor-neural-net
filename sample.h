@@ -7,7 +7,14 @@
 #define IN 2
 #define OUT 1
 
-extern const std::vector<std::array<double, IN>> samples_in;
-extern const std::vector<std::array<double, OUT>> samples_out;
+using array_i = std::array<double, IN>;
+using array_o = std::array<double, OUT>;
+
+struct Sample {
+  array_i in;
+  array_o out;
+};
+
+extern const std::vector<Sample> samples;
 
 #endif

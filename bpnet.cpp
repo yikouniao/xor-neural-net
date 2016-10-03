@@ -51,26 +51,26 @@ BpNet::BpNet(double rate_w_h1_, double rate_w_o_, double rate_thres_h1_,
 BpNet::~BpNet() {}
 
 void BpNet::Train() {
-  const int samples_num = samples_in.size();
+  const int samples_num = samples.size();
   int train_times = 0;
-  bool conv = FALSE;
+  bool conv = false;
   while (!conv) {
-    conv = TRUE;
+    conv = true;
     ++train_times;
-    cout << "The " + train_times + " times training...\n";
+    cout << "The " << train_times << " times training...\n";
     for (int samples_order = 0; samples_order < samples_num; ++samples_order) {
       // Propagation
-      array<double, HIDEN> out_h1 = {0};
+      array_h1 out_h1 = {0};
       GetOutH1(samples_order, out_h1);
 
-      array<double, OUT> out_o = {0};
-      GetOutO(samples_order, out_o);
+      array_o out_o = {0};
+      GetOutO(out_h1, out_o);
 
-      array<double, OUT> err_o;
-      GetErrO(samples_order, err_o);
+      array_o err_o;
+      GetErrO(samples_order, out_o, err_o);
       if (!CheckConv(err_o))
-        conv = FALSE;
-      cout << "Sample " + samples_order + " error: ";
+        conv = false;
+      cout << "Sample " << samples_order << " error: ";
       for (const auto& e : err_o) {
         cout << e << " ";
       }
@@ -82,39 +82,43 @@ void BpNet::Train() {
   }
 }
 
-void BpNet::GetOutH1(int samples_order, array<double, HIDEN>& out_h1) {
-  for (int i = 0; i < HIDEN; ++i) {
+void BpNet::GetOutH1(int samples_order, array_h1& out_h1) {
+  for (int i = 0; i < HIDEN1; ++i) {
     for (int j = 0; j < IN; ++j) {
-      out_h1[i] += samples_in[samples_order][j] * w_h1[j][i];
+      out_h1[i] += samples[samples_order].in[j] * w_h1[j][i];
     }
     out_h1[i] += thres_h1[i];
     out_h1[i] = Sigmod(out_h1[i]);
   }
 }
 
-void BpNet::GetOutO(int samples_order, array<double, OUT>& out_o) {
+void BpNet::GetOutO(const array_h1& out_h1, array_o& out_o) {
   for (int i = 0; i < OUT; ++i) {
-    for (int j = 0; j < HIDEN; ++j) {
-      out_o[i] += out_h1[samples_order][j] * w_o[j][i];
+    for (int j = 0; j < HIDEN1; ++j) {
+      out_o[i] += out_h1[j] * w_o[j][i];
     }
     out_o[i] += thres_o[i];
     out_o[i] = Sigmod(out_o[i]);
   }
 }
 
-void BpNet::GetErrO(int samples_order, const array<double, OUT>& out_o, array<double, OUT>& err_o) {
+void BpNet::GetErrO(int samples_order, const array_o& out_o, array_o& err_o) {
   for (int i = 0; i < OUT; ++i) {
-    err_o[i] = samples_out[samples_order][i] - out_o[i];
+    err_o[i] = samples[samples_order].out[i] - out_o[i];
   }
 }
 
-bool BpNet::CheckConv(const array<double, OUT>& err_o) {
+bool BpNet::CheckConv(const array_o& err_o) {
   for (const auto& e : err_o) {
     if (e < err_thres && e > -err_thres) {
       continue;
     } else {
-      return FALSE;
+      return false;
     }
   }
-  return TRUE;
+  return true;
+}
+
+void BpNet::GetErrH1(const array_o& err_o, array_h1& err_h1) {
+
 }
