@@ -44,16 +44,16 @@ class BpNet {
   void GetOutH1(int samples_order, array<double, HIDEN>& out_h1);
 
   // compute the output of output nodes
-  void GetOutOut(int samples_order, array<double, OUT>& out_out);
+  void GetOutO(int samples_order, array<double, OUT>& out_o);
 
-  // compute the absolute values of errors
-  void GetErr(int samples_order, array<double, OUT>& err);
+  // compute the errors of output nodes
+  void GetErrO(int samples_order, const array<double, OUT>& out_o, array<double, OUT>& err_o);
 
   // check weither the errors are acceptable
-  bool CheckConv(const array<double, OUT>& err);
-};
+  bool CheckConv(const array<double, OUT>& err_o);
 
-double GetRand(); // get a random number in [-0.5 0.5]
-double Sigmod(double x); // sigmod function
+  // compute the errors of hiden nodes in 1st layer
+  void GetErrH1();
+};
 
 #endif

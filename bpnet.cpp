@@ -5,6 +5,18 @@
 
 using namespace std;
 
+namespace {
+// get a random number in [-0.1 0.1]
+inline double GetRand() {
+  return 0.2 * rand() / RAND_MAX - 0.1;
+}
+
+// sigmod function
+inline double Sigmod(double x) {
+  return 1 / (1 + exp(-x));
+}
+} // namespace
+
 BpNet::BpNet(double rate_w_h1_, double rate_w_o_, double rate_thres_h1_,
              double rate_thres_o_, double err_thres_)
     : rate_w_h1(rate_w_h1_), rate_w_o(rate_w_o_), rate_thres_h1(rate_thres_h1_),
@@ -51,15 +63,15 @@ void BpNet::Train() {
       array<double, HIDEN> out_h1 = {0};
       GetOutH1(samples_order, out_h1);
 
-      array<double, OUT> out_out = {0};
-      GetOutOut(samples_order, out_out);
+      array<double, OUT> out_o = {0};
+      GetOutO(samples_order, out_o);
 
-      array<double, OUT> err;
-      GetErr(samples_order, err);
-      if (!CheckConv(err))
+      array<double, OUT> err_o;
+      GetErrO(samples_order, err_o);
+      if (!CheckConv(err_o))
         conv = FALSE;
       cout << "Sample " + samples_order + " error: ";
-      for (const auto& e : err) {
+      for (const auto& e : err_o) {
         cout << e << " ";
       }
       cout << "\n";
@@ -80,39 +92,29 @@ void BpNet::GetOutH1(int samples_order, array<double, HIDEN>& out_h1) {
   }
 }
 
-void BpNet::GetOutOut(int samples_order, array<double, OUT>& out_out) {
+void BpNet::GetOutO(int samples_order, array<double, OUT>& out_o) {
   for (int i = 0; i < OUT; ++i) {
     for (int j = 0; j < HIDEN; ++j) {
-      out_out[i] += out_h1[samples_order][j] * w_o[j][i];
+      out_o[i] += out_h1[samples_order][j] * w_o[j][i];
     }
-    out_out[i] += thres_o[i];
-    out_out[i] = Sigmod(out_out[i]);
+    out_o[i] += thres_o[i];
+    out_o[i] = Sigmod(out_o[i]);
   }
 }
 
-void BpNet::GetErr(int samples_order, array<double, OUT>& err) {
+void BpNet::GetErrO(int samples_order, const array<double, OUT>& out_o, array<double, OUT>& err_o) {
   for (int i = 0; i < OUT; ++i) {
-    err[i] = samples_out[samples_order][i] - out_out[i];
-    if (err[i] < 0)
-      err[i] = -err[i];
+    err_o[i] = samples_out[samples_order][i] - out_o[i];
   }
 }
 
-bool BpNet::CheckConv(const array<double, OUT>& err) {
-  for (const auto& e : err) {
-    if (e < err_thres) {
+bool BpNet::CheckConv(const array<double, OUT>& err_o) {
+  for (const auto& e : err_o) {
+    if (e < err_thres && e > -err_thres) {
       continue;
     } else {
       return FALSE;
     }
   }
   return TRUE;
-}
-
-inline double GetRand() {
-  return (double)rand() / RAND_MAX - 0.5;
-}
-
-inline double Sigmod(double x) {
-  return 1 / (1 + exp(-x));
 }
