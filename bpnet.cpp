@@ -5,8 +5,10 @@
 
 using namespace std;
 
-BpNet::BpNet(double rate_h1_, double rate_o_, double err_thres_)
-    : rate_h1(rate_h1_), rate_o(rate_o_), err_thres(err_thres_) {
+BpNet::BpNet(double rate_w_h1_, double rate_w_o_, double rate_thres_h1_,
+             double rate_thres_o_, double err_thres_)
+    : rate_w_h1(rate_w_h1_), rate_w_o(rate_w_o_), rate_thres_h1(rate_thres_h1_),
+      rate_thres_o(rate_thres_o_), err_thres(err_thres_) {
   srand(time(0)); // use current time as seed for random generator
 
   // initialize w_h1
@@ -37,11 +39,15 @@ BpNet::BpNet(double rate_h1_, double rate_o_, double err_thres_)
 BpNet::~BpNet() {}
 
 void BpNet::Train() {
-  int conv_num = 0; // numbers of convergent samples
-  int samples_num = samples_in.size();
-  while (conv_num < samples_num) { // while not every sample converges
-    // train every sample
+  const int samples_num = samples_in.size();
+  int train_times = 0;
+  bool conv = FALSE;
+  while (!conv) {
+    conv = TRUE;
+    ++train_times;
+    cout << "The " + train_times + " times training...\n";
     for (int samples_order = 0; samples_order < samples_num; ++samples_order) {
+      // Propagation
       array<double, HIDEN> out_h1 = {0};
       GetOutH1(samples_order, out_h1);
 
@@ -50,6 +56,16 @@ void BpNet::Train() {
 
       array<double, OUT> err;
       GetErr(samples_order, err);
+      if (!CheckConv(err))
+        conv = FALSE;
+      cout << "Sample " + samples_order + " error: ";
+      for (const auto& e : err) {
+        cout << e << " ";
+      }
+      cout << "\n";
+
+      // weight update
+
     }
   }
 }
@@ -80,6 +96,17 @@ void BpNet::GetErr(int samples_order, array<double, OUT>& err) {
     if (err[i] < 0)
       err[i] = -err[i];
   }
+}
+
+bool BpNet::CheckConv(const array<double, OUT>& err) {
+  for (const auto& e : err) {
+    if (e < err_thres) {
+      continue;
+    } else {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }
 
 inline double GetRand() {

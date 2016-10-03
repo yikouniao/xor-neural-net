@@ -4,9 +4,11 @@
  * Hiden layer:
  *   layer 1
  *     nodes number: 2 (It should be about 2 * input_num + 1, but XOR is a simple problem)
- *     learning rate: fixed as 0.6
+ *     learning rate of weight value: fixed as 0.6
+ *     learning rate of threshold: fixed as 0.6
  * Output layer:
- *   learning rate: fixed as 0.6
+ *   learning rate of weight value: fixed as 0.6
+ *   learning rate of threshold: fixed as 0.6
  * Convergence checking:
  *   |error| < 0.008 */
 
@@ -19,29 +21,36 @@
 
 class BpNet {
  public:
-  BpNet(double rate_h1_ = 0.6, double rate_o_ = 0.6, double err_thres_ = 0.008);
+  BpNet(double rate_w_h1_ = 0.6, double rate_w_o_ = 0.6,
+        double rate_thres_h1_ = 0.6, double rate_thres_o_ = 0.6,
+        double err_thres_ = 0.008);
   ~BpNet();
 
   // train the neural net
-  void BpNet::Train();
+  void Train();
 
  private:
   std::array<std::array<double, HIDEN>, IN> w_h1; // the input weights of hiden nodes in 1st layer
   std::array<std::array<double, OUT>, HIDEN> w_o; // the input weights of output nodes
   std::array<double, HIDEN> thres_h1; // threshold of hiden nodes in 1st layer
   std::array<double, OUT> thres_o; // threshold of output nodes
-  double rate_h1; // learning rate of hiden nodes in 1st layer
-  double rate_o; // learning rate of output nodes
+  double rate_w_h1; // learning rate of hiden nodes in 1st layer
+  double rate_w_o; // learning rate of output nodes
+  double rate_thres_h1; // learning rate of hiden nodes in 1st layer
+  double rate_thres_o; // learning rate of output nodes
   double err_thres; // threshold of convergence checking
 
   // compute the output of hiden nodes in 1st layer
-  void BpNet::GetOutH1(int samples_order, array<double, HIDEN>& out_h1);
+  void GetOutH1(int samples_order, array<double, HIDEN>& out_h1);
 
   // compute the output of output nodes
-  void BpNet::GetOutOut(int samples_order, array<double, OUT>& out_out);
+  void GetOutOut(int samples_order, array<double, OUT>& out_out);
 
   // compute the absolute values of errors
-  void BpNet::GetErr(int samples_order, array<double, OUT>& err);
+  void GetErr(int samples_order, array<double, OUT>& err);
+
+  // check weither the errors are acceptable
+  bool CheckConv(const array<double, OUT>& err);
 };
 
 double GetRand(); // get a random number in [-0.5 0.5]
