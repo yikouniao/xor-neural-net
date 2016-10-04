@@ -10,11 +10,11 @@
 using array_i = std::array<double, IN>;
 using array_o = std::array<double, OUT>;
 
-struct Sample {
+struct Data {
   array_i in;
   array_o out;
 };
 
-extern const std::vector<Sample> samples;
+extern const std::vector<Data> samples;
 
 #endif

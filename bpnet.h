@@ -15,7 +15,7 @@
 #ifndef _BPNET_H
 #define _BPNET_H
 
-#include "sample.h"
+#include "data.h"
 
 #define HIDEN1 2 // ((2 * IN) + 1)
 
@@ -31,6 +31,9 @@ class BpNet {
   // train the neural net
   void Train();
 
+  // test the model
+  void Test();
+
  private:
   std::array<array_h1, IN> w_h1; // the input weights of hiden nodes in the 1st layer
   std::array<array_o, HIDEN1> w_o; // the input weights of output nodes
@@ -43,13 +46,13 @@ class BpNet {
   double err_thres; // threshold of convergence checking
 
   // compute the output of hiden nodes in the 1st layer
-  void GetOutH1(size_t samples_order, array_h1& out_h1);
+  void GetOutH1(const array_i& in, array_h1& out_h1);
 
   // compute the output of output nodes
   void GetOutO(const array_h1& out_h1, array_o& out_o);
 
   // compute the errors of output nodes
-  void GetErrO(size_t samples_order, const array_o& out_o, array_o& err_o);
+  void GetErrO(const array_o& out, const array_o& out_o, array_o& err_o);
 
   // check weither the errors are acceptable
   bool CheckConv(const array_o& err_o);
@@ -75,7 +78,7 @@ class BpNet {
   void UpdateWO(const array_h1& out_h1, const array_o& sigma_o);
 
   // update the input weights of hiden nodes in the 1st layer
-  void UpdateWH1(size_t samples_order, const array_h1& sigma_h1);
+  void UpdateWH1(const array_i& in, const array_h1& sigma_h1);
 };
 
 #endif

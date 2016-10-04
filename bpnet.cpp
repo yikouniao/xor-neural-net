@@ -61,18 +61,18 @@ void BpNet::Train() {
     for (size_t samples_order = 0; samples_order < samples_num; ++samples_order) {
       // Propagation
       array_h1 out_h1 = {0};
-      GetOutH1(samples_order, out_h1);
+      GetOutH1(samples[samples_order].in, out_h1);
 
       array_o out_o = {0};
       GetOutO(out_h1, out_o);
 
       array_o err_o = {0};
-      GetErrO(samples_order, out_o, err_o);
+      GetErrO(samples[samples_order].out, out_o, err_o);
       if (!CheckConv(err_o))
         conv = false;
       cout << "Sample " << samples_order << " error: ";
       for (const auto& e_o : err_o) {
-        cout << e_o << " ";
+        cout << e_o << "\t";
       }
       cout << "\n";
 
@@ -81,7 +81,7 @@ void BpNet::Train() {
       GetSigmaO(out_o, err_o, sigma_o);
 
       array_h1 err_h1 = {0};
-      GetErrH1(err_o, err_h1);
+      GetErrH1(sigma_o, err_h1);
 
       array_h1 sigma_h1 = {0};
       GetSigmaH1(out_h1, err_h1, sigma_h1);
@@ -89,16 +89,47 @@ void BpNet::Train() {
       UpdateThresO(sigma_o);
       UpdateThresH1(sigma_h1);
       UpdateWO(out_h1, sigma_o);
-      UpdateWH1(samples_order, sigma_h1);
+      UpdateWH1(samples[samples_order].in, sigma_h1);
     }
   }
-  cout << "Training finished.\n";
+  cout << "\nTraining finished.\n\n";
 }
 
-void BpNet::GetOutH1(size_t samples_order, array_h1& out_h1) {
+void BpNet::Test() {
+  while (1) {
+    cout << "Test the model? (y/n):";
+    char c;
+    cin.get(c);
+    if (c == 'y' || c == 'Y') {}
+    else if (c == 'n' || c == 'N') {
+      return;
+    } else {
+      continue;
+    }
+
+    cout << "Please input the data:\n";
+    Data test = {{0}, {0}};
+    for (auto& e : test.in) {
+      cin >> e;
+    }
+
+    array_h1 out_h1 = {0};
+    GetOutH1(test.in, out_h1);
+
+    GetOutO(out_h1, test.out);
+
+    cout << "\nThe output is:\n";
+    for (const auto& e : test.out) {
+      cout << e << "\t";
+    }
+    cout << "\n";
+  }
+}
+
+void BpNet::GetOutH1(const array_i& in, array_h1& out_h1) {
   for (size_t i = 0; i < HIDEN1; ++i) {
     for (size_t j = 0; j < IN; ++j) {
-      out_h1[i] += samples[samples_order].in[j] * w_h1[j][i];
+      out_h1[i] += in[j] * w_h1[j][i];
     }
     out_h1[i] += thres_h1[i];
     out_h1[i] = Sigmod(out_h1[i]);
@@ -115,9 +146,9 @@ void BpNet::GetOutO(const array_h1& out_h1, array_o& out_o) {
   }
 }
 
-void BpNet::GetErrO(size_t samples_order, const array_o& out_o, array_o& err_o) {
+void BpNet::GetErrO(const array_o& out, const array_o& out_o, array_o& err_o) {
   for (size_t i = 0; i < OUT; ++i) {
-    err_o[i] = out_o[i] - samples[samples_order].out[i];
+    err_o[i] = out_o[i] - out[i];
   }
 }
 
@@ -154,14 +185,14 @@ void BpNet::GetSigmaH1(const array_h1& out_h1, const array_h1& err_h1, array_h1&
 
 void BpNet::UpdateThresO(const array_o& sigma_o) {
   for (size_t i = 0; i < OUT; ++i) {
-    double delta_w = -rate_w_o * sigma_o[i];
+    double delta_w = -rate_thres_o * sigma_o[i];
     thres_o[i] += delta_w;
   }
 }
 
 void BpNet::UpdateThresH1(const array_h1& sigma_h1) {
   for (size_t i = 0; i < HIDEN1; ++i) {
-    double delta_w = -rate_w_h1 * sigma_h1[i];
+    double delta_w = -rate_thres_h1 * sigma_h1[i];
     thres_h1[i] += delta_w;
   }
 }
@@ -170,18 +201,16 @@ void BpNet::UpdateWO(const array_h1& out_h1, const array_o& sigma_o) {
   for (size_t i = 0; i < OUT; ++i) {
     double delta_w = -rate_w_o * sigma_o[i];
     for (size_t j = 0; j < HIDEN1; ++j) {
-      delta_w *= out_h1[j];
-      w_o[j][i] += delta_w;
+      w_o[j][i] += delta_w * out_h1[j];
     }
   }
 }
 
-void BpNet::UpdateWH1(size_t samples_order, const array_h1& sigma_h1) {
+void BpNet::UpdateWH1(const array_i& in, const array_h1& sigma_h1) {
   for (size_t i = 0; i < HIDEN1; ++i) {
     double delta_w = -rate_w_h1 * sigma_h1[i];
     for (size_t j = 0; j < IN; ++j) {
-      delta_w *= samples[samples_order].in[j];
-      w_h1[j][i] += delta_w;
+      w_h1[j][i] += delta_w * in[j];
     }
   }
 }
