@@ -6,6 +6,6 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-  array<int, 2> a{1};
-  cout << a[0] << "\n";
+  BpNet bp_net;
+  bp_net.Train();
 }

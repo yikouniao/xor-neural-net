@@ -32,30 +32,50 @@ class BpNet {
   void Train();
 
  private:
-  std::array<array_h1, IN> w_h1; // the input weights of hiden nodes in 1st layer
+  std::array<array_h1, IN> w_h1; // the input weights of hiden nodes in the 1st layer
   std::array<array_o, HIDEN1> w_o; // the input weights of output nodes
-  array_h1 thres_h1; // threshold of hiden nodes in 1st layer
+  array_h1 thres_h1; // threshold of hiden nodes in the 1st layer
   array_o thres_o; // threshold of output nodes
-  double rate_w_h1; // learning rate of hiden nodes in 1st layer
+  double rate_w_h1; // learning rate of hiden nodes in the 1st layer
   double rate_w_o; // learning rate of output nodes
-  double rate_thres_h1; // learning rate of hiden nodes in 1st layer
+  double rate_thres_h1; // learning rate of hiden nodes in the 1st layer
   double rate_thres_o; // learning rate of output nodes
   double err_thres; // threshold of convergence checking
 
-  // compute the output of hiden nodes in 1st layer
-  void GetOutH1(int samples_order, array_h1& out_h1);
+  // compute the output of hiden nodes in the 1st layer
+  void GetOutH1(size_t samples_order, array_h1& out_h1);
 
   // compute the output of output nodes
   void GetOutO(const array_h1& out_h1, array_o& out_o);
 
   // compute the errors of output nodes
-  void GetErrO(int samples_order, const array_o& out_o, array_o& err_o);
+  void GetErrO(size_t samples_order, const array_o& out_o, array_o& err_o);
 
   // check weither the errors are acceptable
   bool CheckConv(const array_o& err_o);
 
-  // compute the errors of hiden nodes in 1st layer
-  void GetErrH1(const array_o& err_o, array_h1& err_h1);
+  // compute the sigma for output nodes
+  // sigma_o = err_o * samples.out * (1 - samples.out)
+  void GetSigmaO(const array_o& out_o, const array_o& err_o, array_o& sigma_o);
+
+  // compute the errors of hiden nodes in the 1st layer
+  void GetErrH1(const array_o& sigma_o, array_h1& err_h1);
+
+  // compute the sigma for hiden nodes in the 1st layer
+  // sigma_h1 = err_h1 * out_h1 * (1 - out_h1)
+  void GetSigmaH1(const array_h1& out_h1, const array_h1& err_h1, array_h1& sigma_h1);
+
+  // update the threshold of output nodes
+  void UpdateThresO(const array_o& sigma_o);
+
+  // update the threshold of hiden nodes in the 1st layer
+  void UpdateThresH1(const array_h1& sigma_h1);
+
+  // update the input weights of output nodes
+  void UpdateWO(const array_h1& out_h1, const array_o& sigma_o);
+
+  // update the input weights of hiden nodes in the 1st layer
+  void UpdateWH1(size_t samples_order, const array_h1& sigma_h1);
 };
 
 #endif
